@@ -10,6 +10,7 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.os.AsyncTask;
+import android.os.Debug;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -33,7 +34,7 @@ public class CreateCartoon extends AsyncTask<ArrayList<Object>,Bitmap,Bitmap> {
     public CreateCartoon(Context context){
         this.context = context;
         progressDialog = new ProgressDialog(this.context);
-        tobeCartoonizedDrawable = R.drawable.mem;
+        tobeCartoonizedDrawable = R.drawable.pryanka;
     }
 
     @Override
@@ -68,81 +69,85 @@ public class CreateCartoon extends AsyncTask<ArrayList<Object>,Bitmap,Bitmap> {
 
 
     private Bitmap startCreateingCartoon(int position){
-        float tempFloat = brightnessLevel(source);
-        Log.d("bzz",String.valueOf(tempFloat));
-        if(tempFloat<0.05f){
+        float tempR=0.45f;
+        float tempG=0.5f;
+        float tempB=0.45f;
+        float brightness;
+        Bitmap tmp;
 
-            Log.d("bzz","Case1 " + source.toString());
-            p.setColorFilter(new ColorMatrixColorFilter(createGreyMatrix(0.1f, 0.4f, 0.05f)));
-            c.drawBitmap(source, 0, 0, p);
-
-        }
-        if(tempFloat<0.15f &&  tempFloat>=0.05f){
-
-            Log.d("bzz","Case3 " + source.toString());
-            p.setColorFilter(new ColorMatrixColorFilter(createGreyMatrix(0.35f, 0.4f, 0.25f)));
-            c.drawBitmap(source, 0, 0, p);
-
-        }
-
-        if((tempFloat<0.3f&& tempFloat>=0.2f)){
-
-            Log.d("bzz","Case4 " + source.toString());
-            p.setColorFilter(new ColorMatrixColorFilter(createGreyMatrix(0.35f, 0.4f, 0.25f)));
-            c.drawBitmap(source, 0, 0, p);
-
-        }
-
-        if((tempFloat<4f&& tempFloat>=0.3f)){
-
-            Log.d("bzz","Case5 "  + source.toString());
-            p.setColorFilter(new ColorMatrixColorFilter(createGreyMatrix(0.35f, 0.5f, 0.35f)));
-            c.drawBitmap(source, 0, 0, p);
-
-        }
-        if((tempFloat<9f&& tempFloat>=4f)|| tempFloat<0.1){
-
-            Log.d("bzz","Case5 "  + source.toString());
-            p.setColorFilter(new ColorMatrixColorFilter(createGreyMatrix(0.45f, 0.5f, 0.45f)));
-            c.drawBitmap(source, 0, 0, p);
-
-        }
-
-        if((tempFloat>=9f && tempFloat<=11f)){
-
-            Log.d("bzz","Case6 " + source.toString());
-            p.setColorFilter(new ColorMatrixColorFilter(createGreyMatrix(0.6f, 0.6f, 0.6f)));
-            c.drawBitmap(source, 0, 0, p);
-
-        }
-
-        if(tempFloat>=11f){
-
-            Log.d("bzz","Case6 " + source.toString());
-            p.setColorFilter(new ColorMatrixColorFilter(createGreyMatrix(0.7f, 0.7f, 0.7f)));
-            c.drawBitmap(source, 0, 0, p);
-
-        }
-
-
+        Log.d("bzz","Case5 "  + source.toString());
+        p.setColorFilter(new ColorMatrixColorFilter(createGreyMatrix(tempR, tempG, tempB)));
+        c.drawBitmap(source, 0, 0, p);
         p.setColorFilter(new ColorMatrixColorFilter(createThresholdMatrix(128)));
         c.drawBitmap(result, 0, 0, p);
-        Bitmap tmp = colorCartoon();
-        if(brightnessLevel(tmp)>10){
+        tmp = colorCartoon();
+        brightness= brightnessLevel(tmp);
+        while(brightness>20 && brightness>30){
+            if(brightness-32.5f>8){
+                tempR+=0.1f;
+                tempG+=0.1f;
+                tempB+=0.1f;
+            }
 
-                Log.d("bzz","Case6 " + source.toString());
-                p.setColorFilter(new ColorMatrixColorFilter(createGreyMatrix(0.7f, 0.7f, 0.7f)));
-                c.drawBitmap(source, 0, 0, p);
-                p.setColorFilter(new ColorMatrixColorFilter(createThresholdMatrix(128)));
-                c.drawBitmap(result, 0, 0, p);
-                tmp = colorCartoon();
-                return tmp;
+            else{
+                tempR+=0.05f;
+                tempG+=0.05f;
+                tempB+=0.05f;
+
+            }
+            Log.d("bzz",String.valueOf(tempR) + "/"+String.valueOf(tempG) + "/"+String.valueOf(tempB));
+            p.setColorFilter(new ColorMatrixColorFilter(createGreyMatrix(tempR,tempG,tempB)));
+            c.drawBitmap(source, 0, 0, p);
+            p.setColorFilter(new ColorMatrixColorFilter(createThresholdMatrix(128)));
+            c.drawBitmap(result, 0, 0, p);
+            tmp = colorCartoon();
+            brightness= brightnessLevel(tmp);
         }
-        else{
+        while(brightness<=20){
+            if(brightness-30<-8){
+                if(tempG>0.35f){
 
+                    tempG-=0.1f;
+                }
+                if(tempR>0.2f){
 
-            return tmp;
+                    tempR-=0.1f;
+                }
+                if(tempB>0.1f){
+
+                    tempB-=0.05f;
+                }
+                else{
+                    break;
+                }
+
+            }
+            else{
+                if(tempG>0.35f){
+
+                    tempG-=0.05f;
+                }
+                if(tempR>0.15f){
+
+                    tempR-=0.05f;
+                }
+                if(tempB>0.7f){
+
+                    tempB-=0.02f;
+                }
+                else{
+                    break;
+                }
+            }
+            Log.d("bzz",String.valueOf(tempR) + "/"+String.valueOf(tempG) + "/"+String.valueOf(tempB));
+            p.setColorFilter(new ColorMatrixColorFilter(createGreyMatrix(tempR,tempG,tempB)));
+            c.drawBitmap(source, 0, 0, p);
+            p.setColorFilter(new ColorMatrixColorFilter(createThresholdMatrix(128)));
+            c.drawBitmap(result, 0, 0, p);
+            tmp = colorCartoon();
+            brightness= brightnessLevel(tmp);
         }
+        return tmp;
     }
 
 
@@ -212,7 +217,6 @@ public class CreateCartoon extends AsyncTask<ArrayList<Object>,Bitmap,Bitmap> {
             darkPixelCount += histogram[i];
         }
 
-        Log.d("bzz",String.valueOf(darkPixelCount) + " " + String.valueOf(allPixelsCount + 1));
             Log.d("bzz",String.valueOf((float)(darkPixelCount*100)/(allPixelsCount+1)));
             return  (float)(darkPixelCount*100)/(allPixelsCount+1);
 
